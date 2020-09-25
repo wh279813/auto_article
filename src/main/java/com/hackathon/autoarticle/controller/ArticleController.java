@@ -1,6 +1,8 @@
 package com.hackathon.autoarticle.controller;
 
 import com.alibaba.fastjson.JSONArray;
+import com.hackathon.autoarticle.dao.CategoryDao;
+import com.hackathon.autoarticle.entity.Category;
 import com.hackathon.autoarticle.service.ArticleService;
 import com.hackathon.autoarticle.vo.SubmitInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ public class ArticleController {
 
     @Autowired
     private ArticleService articleService;
+    @Autowired
+    private CategoryDao categoryDao;
 
     /**
      * 获取文章列表
@@ -23,6 +27,13 @@ public class ArticleController {
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public JSONArray getArticleList() {
+
+        Category category = categoryDao.selectById(1L);
+
+        System.out.printf(category.toString());
+
+
+
         return new JSONArray();
     }
 
