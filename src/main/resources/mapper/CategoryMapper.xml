@@ -9,4 +9,11 @@
     <select id="selectById" parameterType="_long" resultType="com.hackathon.autoarticle.entity.Category">
         SELECT * FROM category WHERE id = #{id}
     </select>
+    <select id="selectByKeyword" resultType="com.hackathon.autoarticle.entity.Category">
+        SELECT * FROM category WHRER `name` like CONCAT('%s', #{keyword}, '%s')
+    </select>
+    <select id="selectAllCategories" resultType="com.hackathon.autoarticle.entity.Category">
+        SELECT * FROM category
+    </select>
+
 </mapper>
