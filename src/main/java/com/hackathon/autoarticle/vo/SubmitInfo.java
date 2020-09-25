@@ -23,7 +23,14 @@ public class SubmitInfo {
     private String productIntro;
     // 科目
     private String subject;
-
+    //行业
+    private String industry;
+    //对象
+    private String object;
+    //年龄
+    private String age;
+    //职业
+    private String profession;
     // 时间
     private String time;
     // 原价

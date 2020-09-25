@@ -8,6 +8,7 @@ import com.hackathon.autoarticle.dao.CorpusDao;
 import com.hackathon.autoarticle.entity.*;
 import com.hackathon.autoarticle.vo.ArticleVo;
 import com.hackathon.autoarticle.vo.SubmitInfo;
+import com.mysql.jdbc.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,8 @@ public class ArticleService {
     CorpusDao corpusDao;
     @Autowired
     CategoryDao categoryDao;
+    @Autowired
+    CorpusService corpusService;
 
     public List<Article> selectAll() {
         return articleDao.selectAll();
@@ -47,23 +50,49 @@ public class ArticleService {
 
     public ArticleVo generateArticle(SubmitInfo submitInfo) {
 
-        // step1. 根据提交信息匹配标签
-        List<Long> categoryIds = categoryService.getMatchedCategory(submitInfo);
+        List<Corpus> ultimateCandidate = new ArrayList<>();
+        //industry
+        if (! StringUtils.isNullOrEmpty(submitInfo.getIndustry())) {
+            List<Category> industryCategories = categoryService.findAllSons(3L);
+            ultimateCandidate = corpusService.getCandidateCorpus(industryCategories, submitInfo.getIndustry());
+        }
+        //object
+        if (! StringUtils.isNullOrEmpty(submitInfo.getObject())) {
+            List<Category> objectCategories = categoryService.findAllSons(4L);
+            List<Corpus> candidate = corpusService.getCandidateCorpus(objectCategories, submitInfo.getObject());
+            ultimateCandidate.retainAll(candidate);
+        }
+        //age
+        if (! StringUtils.isNullOrEmpty(submitInfo.getAge())) {
+            List<Category> ageCategories = categoryService.findAllSons(5L);
+            List<Corpus> candidate = corpusService.getCandidateCorpus(ageCategories, submitInfo.getAge());
+            ultimateCandidate.retainAll(candidate);
+        }
+        //profession
+        if (! StringUtils.isNullOrEmpty(submitInfo.getProfession())) {
+            List<Category> professionCategories = categoryService.findAllSons(6L);
+            List<Corpus> candidate = corpusService.getCandidateCorpus(professionCategories, submitInfo.getProfession());
+            ultimateCandidate.retainAll(candidate);
+        }
+        //subject
+        if (! StringUtils.isNullOrEmpty(submitInfo.getSubject())) {
+            List<Category> subjectCategories = categoryService.findAllSons(7L);
+            List<Corpus> candidate = corpusService.getCandidateCorpus(subjectCategories, submitInfo.getSubject());
+            ultimateCandidate.retainAll(candidate);
+        }
 
-        // step2. 由标签找最匹配文章结构
-        List<Corpus> corpuses = getAllCorpuses();
         // 标题
-        String title = matchStructure(categoryIds, corpuses, Structure.TITLE);
+        String title = matchStructure(ultimateCandidate, Structure.TITLE);
         // 热点
-        String hot = matchStructure(categoryIds, corpuses, Structure.HOT);
+        String hot = matchStructure(ultimateCandidate, Structure.HOT);
         // 背景
-        String background = matchStructure(categoryIds, corpuses, Structure.BACKGROUND);
+        String background = matchStructure(ultimateCandidate, Structure.BACKGROUND);
         // 观点
-        String view = matchStructure(categoryIds, corpuses, Structure.VIEW);
+        String view = matchStructure(ultimateCandidate, Structure.VIEW);
         // 背书
-        String endorse = matchStructure(categoryIds, corpuses, Structure.ENDORSE);
+        String endorse = matchStructure(ultimateCandidate, Structure.ENDORSE);
         // 推广
-        String promotion = matchStructure(categoryIds, corpuses, Structure.PROMOTION);
+        String promotion = matchStructure(ultimateCandidate, Structure.PROMOTION);
 
         ArticleVo articleVo = new ArticleVo();
         articleVo.setTitle(title);
@@ -76,28 +105,11 @@ public class ArticleService {
         return articleVo;
     }
 
-    private List<Corpus> getAllCorpuses() {
-        return corpusDao.selectAll();
-    }
-
-
-    private String matchStructure(List<Long> categories, List<Corpus> corpuses, Structure structure) {
+    private String matchStructure(List<Corpus> allCandidate, Structure structure) {
         List<Corpus> candidate = new ArrayList<>();
-        for (Corpus corpus : corpuses) {
+        for (Corpus corpus : allCandidate) {
             if (corpus.getStructure().equalsIgnoreCase(structure.name())) {
-                String[] categoryIds = corpus.getCategories().split(",");
-                List<Category> categoryList = new ArrayList<>();
-                for (int i = 0; i < categoryIds.length; i++) {
-                   categoryService.getCategoryPath(new Category(Long.parseLong(categoryIds[i])),
-                           categoryDao.selectAllCategories(), categoryList);
-                }
-                List<Long> allCategoryId = new ArrayList<>();
-                for (Category category : categoryList) {
-                    allCategoryId.add(category.getId());
-                }
-                if (allCategoryId.containsAll(categories)) {
-                    candidate.add(corpus);
-                }
+                candidate.add(corpus);
             }
         }
         System.out.println("candidate corpus is: " + JSON.toJSONString(candidate));

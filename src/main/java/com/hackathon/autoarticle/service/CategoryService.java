@@ -135,4 +135,14 @@ public class CategoryService {
     }
 
 
+    public List<Category> findAllSons(Long parentId) {
+        List<Category> back = new ArrayList<>();
+        List<Category> allCategory = categoryDao.selectAllCategories();
+        for (Category category : allCategory) {
+            if (category.getParent_id() == parentId) {
+                back.add(category);
+            }
+        }
+        return back;
+    }
 }
