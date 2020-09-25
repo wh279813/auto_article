@@ -1,25 +1,19 @@
 package com.hackathon.autoarticle.service;
 
-import com.hackathon.autoarticle.dao.ArticleDao;
-import com.hackathon.autoarticle.dao.CorpusDao;
-import com.hackathon.autoarticle.entity.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.hackathon.autoarticle.dao.CategoryDao;
 import com.hackathon.autoarticle.dao.ArticleDao;
+import com.hackathon.autoarticle.dao.CorpusDao;
 import com.hackathon.autoarticle.entity.Article;
 import com.hackathon.autoarticle.entity.Category;
 import com.hackathon.autoarticle.entity.Corpus;
+import com.hackathon.autoarticle.entity.Structure;
 import com.hackathon.autoarticle.vo.ArticleVo;
 import com.hackathon.autoarticle.vo.SubmitInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,6 +26,8 @@ public class ArticleService {
     ArticleDao articleDao;
     @Autowired
     CategoryService categoryService;
+    @Autowired
+    CorpusDao corpusDao;
 
     public List<Article> selectAll() {
         return articleDao.selectAll();
@@ -57,7 +53,7 @@ public class ArticleService {
         // 热点
         String hot = matchStructure(categories, corpuses, Structure.HOT);
         // 背景
-        String background = matchStructure(categories, corpuses ,Structure.BACKGROUND);
+        String background = matchStructure(categories, corpuses, Structure.BACKGROUND);
         // 观点
         String view = matchStructure(categories, corpuses, Structure.VIEW);
         // 背书
@@ -84,7 +80,7 @@ public class ArticleService {
     private String matchStructure(List<Category> categories, List<Corpus> corpuses, Structure structure) {
         for (Corpus corpus : corpuses) {
             if (corpus.getStructure().equalsIgnoreCase(structure.name())) {
-                List<String> categoryIds = Arrays.asList(corpus.getCategories().split(",")) ;
+                List<String> categoryIds = Arrays.asList(corpus.getCategories().split(","));
                 for (Category category : categories) {
                     if (categoryIds.contains(Long.toString(category.getId()))) {
                         return corpus.getContent();
