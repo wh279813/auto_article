@@ -27,8 +27,13 @@ public class SubmitInfo {
     // 时间
     private String time;
     // 原价
-    private String originPrice;
+    private String before;
     // 现价
-    private String nowPrice;
+    private String now;
+
+    // 优惠政策
+    private String policy;
+    // 参与方式
+    private String way;
     
 }
