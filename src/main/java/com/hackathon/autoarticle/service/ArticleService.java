@@ -120,7 +120,7 @@ public class ArticleService {
 
     private String matchStructure(List<Category> categories, List<Corpus> corpuses, Structure structure) {
         for (Corpus corpus : corpuses) {
-            if (corpus.getStructure().equals(structure)) {
+            if (corpus.getStructure().equalsIgnoreCase(structure.name())) {
                 List<String> categoryIds = Arrays.asList(corpus.getCategories().split(",")) ;
                 for (Category category : categories) {
                     if (categoryIds.contains(Long.toString(category.getId()))) {
