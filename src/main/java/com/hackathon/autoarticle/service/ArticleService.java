@@ -44,22 +44,22 @@ public class ArticleService {
     public ArticleVo generateArticle(SubmitInfo submitInfo) {
 
         // step1. 根据提交信息匹配标签
-        List<Category> categories = categoryService.getMatchedCategory(submitInfo);
+        List<Long> categoryIds = categoryService.getMatchedCategory(submitInfo);
 
         // step2. 由标签找最匹配文章结构
         List<Corpus> corpuses = getAllCorpuses();
         // 标题
-        String title = matchStructure(categories, corpuses, Structure.TITLE);
+        String title = matchStructure(categoryIds, corpuses, Structure.TITLE);
         // 热点
-        String hot = matchStructure(categories, corpuses, Structure.HOT);
+        String hot = matchStructure(categoryIds, corpuses, Structure.HOT);
         // 背景
-        String background = matchStructure(categories, corpuses, Structure.BACKGROUND);
+        String background = matchStructure(categoryIds, corpuses, Structure.BACKGROUND);
         // 观点
-        String view = matchStructure(categories, corpuses, Structure.VIEW);
+        String view = matchStructure(categoryIds, corpuses, Structure.VIEW);
         // 背书
-        String endorse = matchStructure(categories, corpuses, Structure.ENDORSE);
+        String endorse = matchStructure(categoryIds, corpuses, Structure.ENDORSE);
         // 推广
-        String promotion = matchStructure(categories, corpuses, Structure.PROMOTION);
+        String promotion = matchStructure(categoryIds, corpuses, Structure.PROMOTION);
 
         ArticleVo articleVo = new ArticleVo();
         articleVo.setTitle(title);
@@ -77,12 +77,12 @@ public class ArticleService {
     }
 
 
-    private String matchStructure(List<Category> categories, List<Corpus> corpuses, Structure structure) {
+    private String matchStructure(List<Long> categories, List<Corpus> corpuses, Structure structure) {
         for (Corpus corpus : corpuses) {
             if (corpus.getStructure().equalsIgnoreCase(structure.name())) {
                 List<String> categoryIds = Arrays.asList(corpus.getCategories().split(","));
-                for (Category category : categories) {
-                    if (categoryIds.contains(Long.toString(category.getId()))) {
+                for (Long categoryId : categories) {
+                    if (categoryIds.contains(Long.toString(categoryId))) {
                         return corpus.getContent();
                     }
                 }

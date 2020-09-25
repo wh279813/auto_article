@@ -1,16 +1,19 @@
 package com.hackathon.autoarticle.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hackathon.autoarticle.dao.CategoryDao;
 import com.hackathon.autoarticle.entity.Category;
-import com.hackathon.autoarticle.entity.EntityEnum;
 import com.hackathon.autoarticle.vo.SubmitInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -22,24 +25,47 @@ public class CategoryService {
     @Autowired
     CategoryDao categoryDao;
 
-    public List<Category> getMatchedCategory(SubmitInfo submitInfo) {
-        JSONObject entityInfo = convertSubmitInfoToEntity(submitInfo);
+    private static Category root = new Category(1L, 0, "根节点", 0);;
+
+    public List<Long> getMatchedCategory(SubmitInfo submitInfo) {
+        JSONObject entityInfo = convertSubmitInfo(submitInfo);
         List<Category> allCategories = categoryDao.selectAllCategories();
-        Set<Long> categoryIds = new HashSet<>();
+        Set<Long> idSet = new HashSet<>();
+        idSet.add(root.getId());
 
         for (String key : entityInfo.keySet()) {
+            if (entityInfo.get(key) == null) {
+                continue;
+            }
             List<Category> matched = allCategories.stream()
                     .filter(category -> category.getName().contains(entityInfo.getString(key)))
                     .collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(matched)) {
                 for (Category category : matched) {
                     List<Category> categoryPath = getCategoryPath(category, allCategories, new ArrayList<>());
-                    categoryIds.addAll(categoryPath.stream().map(Category::getId).collect(Collectors.toList()));
+                    if (!CollectionUtils.isEmpty(categoryPath)) {
+                        idSet.addAll(categoryPath.stream().map(Category::getId).collect(Collectors.toList()));
+                    }
                 }
             }
         }
 
-        return new ArrayList<>();
+        return new ArrayList<>(idSet);
+    }
+
+    public static void main(String[] args) {
+        // 待处理字符串
+        String wpp = "jdbc:mysql://${wpp1:raw}:${wpp2}/${wpp3}?&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&zeroDateTimeBehavior=convertToNull";
+        //\u0024\u007B\u0028\u002E\u002A\u003F\u0029}
+        // 匹配方式
+        Pattern p = Pattern.compile("\\$\\{(.*?)}");
+        // 匹配】
+        Matcher matcher = p.matcher(wpp);
+        // 处理匹配到的值
+        while (matcher.find()) {
+            wpp = wpp.replace(matcher.group(), "raw");
+            System.out.println("woo: " + matcher.group());
+        }
     }
 
     /**
@@ -68,18 +94,21 @@ public class CategoryService {
         return category;
     }
 
-    public JSONObject convertSubmitInfoToEntity(SubmitInfo submitInfo) {
+    /**
+     * 需要匹配category的表单信息
+     *
+     * @param submitInfo
+     * @return
+     */
+    public JSONObject convertSubmitInfo(SubmitInfo submitInfo) {
         JSONObject entity = new JSONObject();
-        entity.put("who", "孩子");
-        entity.put("how", "写");
-        entity.put("what", "作业");
 
-        JSONObject submitObject = JSON.parseObject(JSON.toJSONString(submitInfo));
-        for (String key : submitObject.keySet()) {
-            if (EntityEnum.contains(key)) {
-                entity.put(key, submitObject.getString(key));
-            }
-        }
+        entity.put("productName", submitInfo.getProductName());
+        entity.put("target", submitInfo.getTarget());
+        entity.put("cutPointName", submitInfo.getCutPointName());
+        entity.put("cutPointIntroduction", submitInfo.getCutPointIntroduction());
+        entity.put("productIntroduction", submitInfo.getProductIntroduction());
+        entity.put("subject", submitInfo.getSubject());
 
         return entity;
     }
