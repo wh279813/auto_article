@@ -1,7 +1,10 @@
 package com.hackathon.autoarticle.controller;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.hackathon.autoarticle.dao.CategoryDao;
 import com.hackathon.autoarticle.service.ArticleService;
+import com.hackathon.autoarticle.vo.ArticleVo;
 import com.hackathon.autoarticle.vo.SubmitInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +26,16 @@ public class ArticleController {
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     public JSONArray getArticleList() {
-        return new JSONArray();
+        JSONArray jsonArray = new JSONArray();
+        JSONObject article = new JSONObject();
+        article.put("id", 1);
+        article.put("title", "标题");
+        article.put("industry", "行业");
+        article.put("template", "模版");
+        article.put("createTime", System.currentTimeMillis());
+
+        jsonArray.add(article);
+        return jsonArray;
     }
 
     /**
@@ -43,8 +55,8 @@ public class ArticleController {
      * @return
      */
     @RequestMapping(value = "/submit", method = RequestMethod.POST)
-    public String deleteArticle(@RequestBody SubmitInfo submitInfo) {
-        return "Success";
+    public ArticleVo generateArticle(@RequestBody SubmitInfo submitInfo) {
+        return articleService.generateArticle(submitInfo);
     }
 
     /**
