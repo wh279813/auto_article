@@ -25,13 +25,15 @@ public class CategoryService {
     @Autowired
     CategoryDao categoryDao;
 
-    private static Category root = new Category(1L, 0, "根节点", 0);;
+    private static Category education = new Category(8L, 3, "教育", 2);
+
+
 
     public List<Long> getMatchedCategory(SubmitInfo submitInfo) {
         JSONObject entityInfo = convertSubmitInfo(submitInfo);
         List<Category> allCategories = categoryDao.selectAllCategories();
         Set<Long> idSet = new HashSet<>();
-        idSet.add(root.getId());
+        idSet.add(education.getId());
 
         for (String key : entityInfo.keySet()) {
             if (entityInfo.get(key) == null) {
@@ -103,11 +105,11 @@ public class CategoryService {
     public JSONObject convertSubmitInfo(SubmitInfo submitInfo) {
         JSONObject entity = new JSONObject();
 
-        entity.put("productName", submitInfo.getProductName());
+        entity.put("productName", submitInfo.getProduct());
         entity.put("target", submitInfo.getTarget());
         entity.put("cutPointName", submitInfo.getCutPointName());
         entity.put("cutPointIntroduction", submitInfo.getCutPointIntroduction());
-        entity.put("productIntroduction", submitInfo.getProductIntroduction());
+        entity.put("productIntroduction", submitInfo.getProductIntro());
         entity.put("subject", submitInfo.getSubject());
 
         return entity;

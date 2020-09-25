@@ -12,7 +12,7 @@ public class SubmitInfo {
     private String coreProblem;
 
     // 营销产品名称
-    private String productName;
+    private String product;
     // 目标人群
     private String target;
     // 切入点名称
@@ -20,10 +20,9 @@ public class SubmitInfo {
     // 切入点名称
     private String cutPointIntroduction;
     // 营销产品介绍
-    private String productIntroduction;
+    private String productIntro;
     // 科目
     private String subject;
-
 
     // 时间
     private String time;

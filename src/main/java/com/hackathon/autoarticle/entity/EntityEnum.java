@@ -8,12 +8,18 @@ public enum EntityEnum {
     who,
     how,
     what,
-    productName,
-    target,
-    cutPointName,
-    cutPointIntroduction,
+    related,
+    product,
+    productIntro,
+    population,
+    point,
+    pointIntro,
     productIntroduction,
-    subject;
+    time,
+    before,
+    now,
+    policy,
+    way;
 
     public static boolean contains(String key) {
         for (EntityEnum entity : EntityEnum.values()) {

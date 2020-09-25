@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.hackathon.autoarticle.dao.ArticleDao;
 import com.hackathon.autoarticle.dao.CategoryDao;
 import com.hackathon.autoarticle.dao.CorpusDao;
-import com.hackathon.autoarticle.entity.Article;
-import com.hackathon.autoarticle.entity.Category;
-import com.hackathon.autoarticle.entity.Corpus;
-import com.hackathon.autoarticle.entity.Structure;
+import com.hackathon.autoarticle.entity.*;
 import com.hackathon.autoarticle.vo.ArticleVo;
 import com.hackathon.autoarticle.vo.SubmitInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Random;
 
 /**
@@ -110,12 +109,37 @@ public class ArticleService {
         return "未匹配到";
     }
 
-    private String replaceEntities(SubmitInfo submitInfo, String corpus) {
+    private static String replaceEntities(SubmitInfo submitInfo, String corpus) {
         JSONObject info = JSON.parseObject(JSON.toJSONString(submitInfo));
+        JSONObject entityObject = new JSONObject();
         for (String key : info.keySet()) {
-            corpus = corpus.replace("${" + key + "}", info.getString(key));
+            if (EntityEnum.contains(key)) {
+                entityObject.put(key, info.getString(key));
+            }
         }
+
+        Pattern p = Pattern.compile("\\$\\{(.*?)}");
+        Matcher matcher = p.matcher(corpus);
+        // 处理匹配到的值
+        while (matcher.find()) {
+            List<String> keyValuePair = Arrays.asList(matcher.group().substring(2, matcher.group().length() -1).split(":"));
+            String entityKey = keyValuePair.get(0);
+            String rawValue = keyValuePair.get(1);
+
+            corpus = corpus.replace(matcher.group(), entityObject.get(entityKey) == null ? rawValue : entityObject.getString(entityKey));
+        }
+
         return corpus;
     }
+
+    public static void main(String[] args) {
+        SubmitInfo submitInfo = new SubmitInfo();
+        submitInfo.setProduct("产品");
+
+
+        replaceEntities(submitInfo, "这是个很好的${product:电脑}。");
+    }
+
+
 
 }
