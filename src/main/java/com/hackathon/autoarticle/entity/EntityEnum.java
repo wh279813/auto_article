@@ -13,6 +13,15 @@ public enum EntityEnum {
     cutPointName,
     cutPointIntroduction,
     productIntroduction,
-    subject
+    subject;
 
+    public static boolean contains(String key) {
+        for (EntityEnum entity : EntityEnum.values()) {
+            if (entity.toString().equals(key)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

@@ -3,8 +3,6 @@ package com.hackathon.autoarticle.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hackathon.autoarticle.dao.ArticleDao;
-import com.hackathon.autoarticle.dao.CategoryDao;
 import com.hackathon.autoarticle.entity.Article;
 import com.hackathon.autoarticle.service.ArticleService;
 import com.hackathon.autoarticle.vo.ArticleVo;
@@ -61,15 +59,4 @@ public class ArticleController {
     public ArticleVo generateArticle(@RequestBody SubmitInfo submitInfo) {
         return articleService.generateArticle(submitInfo);
     }
-
-    /**
-     * hello world
-     *
-     * @return
-     */
-    @RequestMapping(value = "/hello", method = RequestMethod.GET)
-    public String helloWorld() {
-        return "hello world";
-    }
-
 }

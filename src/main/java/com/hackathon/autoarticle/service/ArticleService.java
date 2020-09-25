@@ -6,6 +6,10 @@ import com.hackathon.autoarticle.entity.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hackathon.autoarticle.dao.CategoryDao;
+import com.hackathon.autoarticle.dao.ArticleDao;
+import com.hackathon.autoarticle.entity.Article;
+import com.hackathon.autoarticle.entity.Category;
+import com.hackathon.autoarticle.entity.Corpus;
 import com.hackathon.autoarticle.vo.ArticleVo;
 import com.hackathon.autoarticle.vo.SubmitInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by wanghuan on 2020/9/25.
@@ -23,12 +29,9 @@ import java.util.stream.Collectors;
 public class ArticleService {
 
     @Autowired
-    private CategoryDao categoryDao;
-
+    ArticleDao articleDao;
     @Autowired
-    private ArticleDao articleDao;
-    @Autowired
-    private CorpusDao corpusDao;
+    CategoryService categoryService;
 
     public List<Article> selectAll() {
         return articleDao.selectAll();
@@ -45,7 +48,7 @@ public class ArticleService {
     public ArticleVo generateArticle(SubmitInfo submitInfo) {
 
         // step1. 根据提交信息匹配标签
-        List<Category> categories = getMatchedCategory(submitInfo);
+        List<Category> categories = categoryService.getMatchedCategory(submitInfo);
 
         // step2. 由标签找最匹配文章结构
         List<Corpus> corpuses = getAllCorpuses();
@@ -72,46 +75,6 @@ public class ArticleService {
 
         return articleVo;
     }
-
-    private List<Category> getMatchedCategory(SubmitInfo submitInfo) {
-        JSONObject entityInfo = convertSubmitInfoToEntity(submitInfo);
-        List<Category> allCategories = categoryDao.selectAllCategories();
-        Set<Long> categoryIds = new HashSet<>();
-
-        for (String key : entityInfo.keySet()) {
-            List<Category> matched = allCategories.stream()
-                    .filter(category -> category.getName().contains(entityInfo.getString(key)))
-                    .collect(Collectors.toList());
-            if (!CollectionUtils.isEmpty(matched)) {
-                for (Category category : matched) {
-
-                }
-            }
-        }
-
-        return new ArrayList<>();
-    }
-
-    /**
-     * 递归寻找
-     *
-     * @param
-     * @param all
-     * @return
-     */
-    private List<Category> getCategoryPath(Category node, List<Category> all, List<Category> path) {
-        Category category = all.stream().filter(c -> c.getId().e
-        );
-
-        if (category != null) {
-            getCategoryPath(category.getParent_id(), all, path);
-            path.add(category);
-        }
-
-        return path;
-    }
-
-
 
     private List<Corpus> getAllCorpuses() {
         return corpusDao.selectAll();
@@ -162,10 +125,6 @@ public class ArticleService {
             corpus = corpus.replace("${" + key + "}", info.getString(key));
         }
         return corpus;
-    }
-
-    private JSONObject convertSubmitInfoToEntity(SubmitInfo submitInfo) {
-        return new JSONObject();
     }
 
 }

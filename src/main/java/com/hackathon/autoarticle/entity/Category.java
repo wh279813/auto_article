@@ -6,6 +6,16 @@ public class Category {
     private String name;
     private int leve;
 
+    public Category(long id, long parent_id, String name, int leve) {
+        this.id = id;
+        this.parent_id = parent_id;
+        this.name = name;
+        this.leve = leve;
+    }
+
+    public Category() {
+    }
+
     public long getId() {
         return id;
     }
