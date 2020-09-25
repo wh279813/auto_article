@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 
 @SpringBootApplication
-@MapperScan("com.autoartical.*.dao")
+@MapperScan("com.autoarticle.*.dao")
 @Configuration
 
 public class AutoArticleApplication {
