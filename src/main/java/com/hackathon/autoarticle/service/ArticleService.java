@@ -1,23 +1,19 @@
 package com.hackathon.autoarticle.service;
 
 import com.hackathon.autoarticle.dao.ArticleDao;
-import com.hackathon.autoarticle.entity.Article;
+import com.hackathon.autoarticle.dao.CorpusDao;
+import com.hackathon.autoarticle.entity.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hackathon.autoarticle.dao.CategoryDao;
-import com.hackathon.autoarticle.entity.Category;
-import com.hackathon.autoarticle.entity.Corpus;
-import com.hackathon.autoarticle.entity.EntityEnum;
 import com.hackathon.autoarticle.vo.ArticleVo;
 import com.hackathon.autoarticle.vo.SubmitInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -30,7 +26,9 @@ public class ArticleService {
     private CategoryDao categoryDao;
 
     @Autowired
-    ArticleDao articleDao;
+    private ArticleDao articleDao;
+    @Autowired
+    private CorpusDao corpusDao;
 
     public List<Article> selectAll() {
         return articleDao.selectAll();
@@ -52,17 +50,17 @@ public class ArticleService {
         // step2. 由标签找最匹配文章结构
         List<Corpus> corpuses = getAllCorpuses();
         // 标题
-        String title = matchTitle(categories, corpuses);
+        String title = matchStructure(categories, corpuses, Structure.TITLE);
         // 热点
-        String hot = matchHot(categories, corpuses);
+        String hot = matchStructure(categories, corpuses, Structure.HOT);
         // 背景
-        String background = matchBackground(categories, corpuses);
+        String background = matchStructure(categories, corpuses ,Structure.BACKGROUND);
         // 观点
-        String view = matchView(categories, corpuses);
+        String view = matchStructure(categories, corpuses, Structure.VIEW);
         // 背书
-        String endorse = matchEndorse(categories, corpuses);
+        String endorse = matchStructure(categories, corpuses, Structure.ENDORSE);
         // 推广
-        String promotion = matchPromotion(categories, corpuses);
+        String promotion = matchStructure(categories, corpuses, Structure.PROMOTION);
 
         ArticleVo articleVo = new ArticleVo();
         articleVo.setTitle(title);
@@ -97,13 +95,13 @@ public class ArticleService {
     /**
      * 递归寻找
      *
-     * @param category
+     * @param
      * @param all
      * @return
      */
     private List<Category> getCategoryPath(Category node, List<Category> all, List<Category> path) {
         Category category = all.stream().filter(c -> c.getId().e
-        )
+        );
 
         if (category != null) {
             getCategoryPath(category.getParent_id(), all, path);
@@ -116,8 +114,22 @@ public class ArticleService {
 
 
     private List<Corpus> getAllCorpuses() {
-        // todo
-        return new ArrayList<>();
+        return corpusDao.selectAll();
+    }
+
+
+    private String matchStructure(List<Category> categories, List<Corpus> corpuses, Structure structure) {
+        for (Corpus corpus : corpuses) {
+            if (corpus.getStructure().equals(structure)) {
+                List<String> categoryIds = Arrays.asList(corpus.getCategories().split(",")) ;
+                for (Category category : categories) {
+                    if (categoryIds.contains(Long.toString(category.getId()))) {
+                        return corpus.getContent();
+                    }
+                }
+            }
+        }
+        return "未匹配到";
     }
 
     private String matchTitle(List<Category> categories, List<Corpus> corpuses) {
