@@ -25,6 +25,10 @@ public class ArticleService {
         return articleDao.selectAll();
     }
 
+    public int deleteById(long id) {
+        return articleDao.deleteById(id);
+    }
+
     public ArticleVo generateArticle(SubmitInfo submitInfo) {
 
         // step1. 根据提交信息匹配标签

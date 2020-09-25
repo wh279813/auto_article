@@ -6,4 +6,8 @@
     <select id="selectAll" resultType="com.hackathon.autoarticle.entity.Article">
         SELECT * FROM article
     </select>
+
+    <delete id="deleteById" parameterType="_long">
+        DELETE from article where id = #{id}
+    </delete>
 </mapper>
