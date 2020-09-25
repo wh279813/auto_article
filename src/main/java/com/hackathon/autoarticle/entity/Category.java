@@ -12,7 +12,9 @@ public class Category {
         this.name = name;
         this.leve = leve;
     }
-
+    public Category(long id) {
+        this.id = id;
+    }
     public Category() {
     }
 

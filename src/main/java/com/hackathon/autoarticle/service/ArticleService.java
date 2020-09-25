@@ -3,6 +3,7 @@ package com.hackathon.autoarticle.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hackathon.autoarticle.dao.ArticleDao;
+import com.hackathon.autoarticle.dao.CategoryDao;
 import com.hackathon.autoarticle.dao.CorpusDao;
 import com.hackathon.autoarticle.entity.Article;
 import com.hackathon.autoarticle.entity.Category;
@@ -13,8 +14,10 @@ import com.hackathon.autoarticle.vo.SubmitInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by wanghuan on 2020/9/25.
@@ -28,6 +31,8 @@ public class ArticleService {
     CategoryService categoryService;
     @Autowired
     CorpusDao corpusDao;
+    @Autowired
+    CategoryDao categoryDao;
 
     public List<Article> selectAll() {
         return articleDao.selectAll();
@@ -78,16 +83,30 @@ public class ArticleService {
 
 
     private String matchStructure(List<Long> categories, List<Corpus> corpuses, Structure structure) {
+        List<Corpus> candidate = new ArrayList<>();
         for (Corpus corpus : corpuses) {
             if (corpus.getStructure().equalsIgnoreCase(structure.name())) {
-                List<String> categoryIds = Arrays.asList(corpus.getCategories().split(","));
-                for (Long categoryId : categories) {
-                    if (categoryIds.contains(Long.toString(categoryId))) {
-                        return corpus.getContent();
-                    }
+                String[] categoryIds = corpus.getCategories().split(",");
+                List<Category> categoryList = new ArrayList<>();
+                for (int i = 0; i < categoryIds.length; i++) {
+                   categoryService.getCategoryPath(new Category(Long.parseLong(categoryIds[i])),
+                           categoryDao.selectAllCategories(), categoryList);
+                }
+                List<Long> allCategoryId = new ArrayList<>();
+                for (Category category : categoryList) {
+                    allCategoryId.add(category.getId());
+                }
+                if (allCategoryId.containsAll(categories)) {
+                    candidate.add(corpus);
                 }
             }
         }
+        System.out.println("candidate corpus is: " + JSON.toJSONString(candidate));
+        if (candidate.size() > 0) {
+            Random random = new Random();
+            return candidate.get(random.nextInt(candidate.size())).getContent();
+        }
+
         return "未匹配到";
     }
 

@@ -75,7 +75,7 @@ public class CategoryService {
      * @param all
      * @return
      */
-    private List<Category> getCategoryPath(Category node, List<Category> all, List<Category> path) {
+    public List<Category> getCategoryPath(Category node, List<Category> all, List<Category> path) {
         if (node != null) {
             getCategoryPath(getCategoryById(node.getParent_id(), all), all, path);
             path.add(node);
