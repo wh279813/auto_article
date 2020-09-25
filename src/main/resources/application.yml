@@ -1,7 +1,0 @@
-spring:
-  datasource:
-    　driver-class-name: com.mysql.jdbc.Driver
-    　url: jdbc:mysql://192.168.9.105:3307/ysf_hackathon?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
-    　username: yawaii
-      password: yawaii
-      type: com.alibaba.druid.pool.DruidDataSource
