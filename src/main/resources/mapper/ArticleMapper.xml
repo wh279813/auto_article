@@ -10,4 +10,9 @@
     <delete id="deleteById" parameterType="_long">
         DELETE from article where id = #{id}
     </delete>
+    
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true" parameterType="com.hackathon.autoarticle.entity.Article">
+        INSERT into article (title,industry,template,createTime)
+        values (#{title}, #{industry}, #{template}, #{createTime})
+    </insert>
 </mapper>

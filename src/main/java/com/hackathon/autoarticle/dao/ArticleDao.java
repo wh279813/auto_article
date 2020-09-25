@@ -10,4 +10,6 @@ public interface ArticleDao {
     List<Article> selectAll();
 
     int deleteById(@Param("id") long id);
+
+    int insert(Article article);
 }

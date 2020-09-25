@@ -46,7 +46,7 @@ public class ArticleController {
      *
      * @return
      */
-    @RequestMapping(value = "/delete", method = RequestMethod.GET)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public String deleteArticle(@RequestParam(value = "id") Long id) {
         articleService.deleteById(id);
         return "Success";

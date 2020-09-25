@@ -29,6 +29,10 @@ public class ArticleService {
         return articleDao.deleteById(id);
     }
 
+    public int insert(Article article) {
+        return articleDao.insert(article);
+    }
+
     public ArticleVo generateArticle(SubmitInfo submitInfo) {
 
         // step1. 根据提交信息匹配标签
