@@ -62,7 +62,7 @@ public class CategoryService {
         Category category = null;
         for (Category node : all) {
             if (node.getId() == id) {
-                category = node;
+                return node;
             }
         }
         return category;
@@ -90,8 +90,8 @@ public class CategoryService {
         Category root = new Category(1L, 0, "根节点", 0);
         Category one1 = new Category(2L, 1, "1.1", 1);
         Category one2 = new Category(3L, 1, "1.2", 1);
-        Category two1 = new Category(4L, 0, "2.1", 2);
-        Category two2 = new Category(5L, 0, "2.2", 2);
+        Category two1 = new Category(4L, 2, "2.1", 2);
+        Category two2 = new Category(5L, 2, "2.2", 2);
 
         all.add(root);
         all.add(one1);

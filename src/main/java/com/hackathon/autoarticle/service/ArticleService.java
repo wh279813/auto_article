@@ -91,30 +91,6 @@ public class ArticleService {
         return "未匹配到";
     }
 
-    private String matchTitle(List<Category> categories, List<Corpus> corpuses) {
-        return "标题";
-    }
-
-    private String matchHot(List<Category> categories, List<Corpus> corpuses) {
-        return "热点";
-    }
-
-    private String matchBackground(List<Category> categories, List<Corpus> corpuses) {
-        return "背景";
-    }
-
-    private String matchView(List<Category> categories, List<Corpus> corpuses) {
-        return "观点";
-    }
-
-    private String matchEndorse(List<Category> categories, List<Corpus> corpuses) {
-        return "背书";
-    }
-
-    private String matchPromotion(List<Category> categories, List<Corpus> corpuses) {
-        return "推广";
-    }
-
     private String replaceEntities(SubmitInfo submitInfo, String corpus) {
         JSONObject info = JSON.parseObject(JSON.toJSONString(submitInfo));
         for (String key : info.keySet()) {
