@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @SpringBootApplication
 @MapperScan("com.hackathon.autoarticle.dao")
 @Configuration
-
 public class AutoArticleApplication {
 
     public static void main(String[] args) {

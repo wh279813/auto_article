@@ -1,9 +1,12 @@
 package com.hackathon.autoarticle.service;
 
+import com.hackathon.autoarticle.dao.ArticleDao;
+import com.hackathon.autoarticle.entity.Article;
 import com.hackathon.autoarticle.entity.Category;
 import com.hackathon.autoarticle.entity.Corpus;
 import com.hackathon.autoarticle.vo.ArticleVo;
 import com.hackathon.autoarticle.vo.SubmitInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,6 +17,13 @@ import java.util.List;
  */
 @Service
 public class ArticleService {
+
+    @Autowired
+    ArticleDao articleDao;
+
+    public List<Article> selectAll() {
+        return articleDao.selectAll();
+    }
 
     public ArticleVo generateArticle(SubmitInfo submitInfo) {
 
