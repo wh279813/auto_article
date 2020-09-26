@@ -8,17 +8,17 @@ import com.hackathon.autoarticle.dao.CorpusDao;
 import com.hackathon.autoarticle.entity.*;
 import com.hackathon.autoarticle.vo.ArticleVo;
 import com.hackathon.autoarticle.vo.SubmitInfo;
-import com.mysql.jdbc.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Random;
 
 /**
  * Created by wanghuan on 2020/9/25.
@@ -50,72 +50,32 @@ public class ArticleService {
     }
 
     public ArticleVo generateArticle(SubmitInfo submitInfo) {
+        List<Corpus> ultimateCandidate = corpusDao.selectAll();
 
-        List<Corpus> ultimateCandidate = new ArrayList<>();
-        //industry
-        if (! StringUtils.isNullOrEmpty(submitInfo.getIndustry())) {
-            List<Category> industryCategories = categoryService.findAllSons(3L);
-            ultimateCandidate = corpusService.getCandidateCorpus(industryCategories, submitInfo.getIndustry());
-        }
-        //object
-        if (! StringUtils.isNullOrEmpty(submitInfo.getObject())) {
-            List<Category> objectCategories = categoryService.findAllSons(4L);
-            List<Corpus> candidate = corpusService.getCandidateCorpus(objectCategories, submitInfo.getObject());
-            if (CollectionUtils.isEmpty(ultimateCandidate)) {
-                ultimateCandidate = candidate;
-            } else{
-                ultimateCandidate.retainAll(candidate);
-            }
-        }
-        //age
-        if (! StringUtils.isNullOrEmpty(submitInfo.getAge())) {
-            List<Category> ageCategories = categoryService.findAllSons(5L);
-            List<Corpus> candidate = corpusService.getCandidateCorpus(ageCategories, submitInfo.getAge());
-            if (CollectionUtils.isEmpty(ultimateCandidate)) {
-                ultimateCandidate = candidate;
-            } else{
-                ultimateCandidate.retainAll(candidate);
-            }
-        }
-        //profession
-        if (! StringUtils.isNullOrEmpty(submitInfo.getProfession())) {
-            List<Category> professionCategories = categoryService.findAllSons(6L);
-            List<Corpus> candidate = corpusService.getCandidateCorpus(professionCategories, submitInfo.getProfession());
-            if (CollectionUtils.isEmpty(ultimateCandidate)) {
-                ultimateCandidate = candidate;
-            } else{
-                ultimateCandidate.retainAll(candidate);
-            }
-        }
-        //subject
-        if (! StringUtils.isNullOrEmpty(submitInfo.getSubject())) {
-            List<Category> subjectCategories = categoryService.findAllSons(7L);
-            List<Corpus> candidate = corpusService.getCandidateCorpus(subjectCategories, submitInfo.getSubject());
-            if (CollectionUtils.isEmpty(ultimateCandidate)) {
-                ultimateCandidate = candidate;
-            } else{
-                ultimateCandidate.retainAll(candidate);
+        // 匹配标签
+        JSONObject infoObj = JSON.parseObject(JSON.toJSONString(submitInfo));
+        for (CategoryEnum categoryEnum : CategoryEnum.values()) {
+            if (!StringUtils.isEmpty(infoObj.getString(categoryEnum.toString()))) {
+                List<Corpus> Corpuses = corpusService.getCandidateCorpus(
+                        categoryService.findAllSons(categoryEnum.getRelatedCategory()), submitInfo.getIndustry()
+                );
+
+                ultimateCandidate.retainAll(Corpuses);
             }
         }
 
         // 标题
-        String title = matchStructure(ultimateCandidate, Structure.TITLE);
-        title = replaceEntities(submitInfo, title);
+        String title = matchStructure(submitInfo, ultimateCandidate, Structure.TITLE);
         // 热点
-        String hot = matchStructure(ultimateCandidate, Structure.HOT);
-        hot = replaceEntities(submitInfo, hot);
+        String hot = matchStructure(submitInfo, ultimateCandidate, Structure.HOT);
         // 背景
-        String background = matchStructure(ultimateCandidate, Structure.BACKGROUND);
-        background = replaceEntities(submitInfo, background);
+        String background = matchStructure(submitInfo, ultimateCandidate, Structure.BACKGROUND);
         // 观点
-        String view = matchStructure(ultimateCandidate, Structure.VIEW);
-        view = replaceEntities(submitInfo, view);
+        String view = matchStructure(submitInfo, ultimateCandidate, Structure.VIEW);
         // 背书
-        String endorse = matchStructure(ultimateCandidate, Structure.ENDORSE);
-        endorse = replaceEntities(submitInfo, endorse);
+        String endorse = matchStructure(submitInfo, ultimateCandidate, Structure.ENDORSE);
         // 推广
-        String promotion = matchStructure(ultimateCandidate, Structure.PROMOTION);
-        promotion = replaceEntities(submitInfo, promotion);
+        String promotion = matchStructure(submitInfo, ultimateCandidate, Structure.PROMOTION);
 
         ArticleVo articleVo = new ArticleVo();
         articleVo.setTitle(title);
@@ -128,7 +88,7 @@ public class ArticleService {
         return articleVo;
     }
 
-    private String matchStructure(List<Corpus> allCandidate, Structure structure) {
+    private String matchStructure(SubmitInfo submitInfo, List<Corpus> allCandidate, Structure structure) {
         List<Corpus> candidate = new ArrayList<>();
         for (Corpus corpus : allCandidate) {
             if (corpus.getStructure().equalsIgnoreCase(structure.name())) {
@@ -138,7 +98,8 @@ public class ArticleService {
         System.out.println("candidate corpus is: " + JSON.toJSONString(candidate));
         if (candidate.size() > 0) {
             Random random = new Random();
-            return candidate.get(random.nextInt(candidate.size())).getContent();
+            String corpus = candidate.get(random.nextInt(candidate.size())).getContent();
+            return replaceEntities(submitInfo, corpus);
         }
 
         return "未匹配到";
@@ -157,7 +118,7 @@ public class ArticleService {
         Matcher matcher = p.matcher(corpus);
         // 处理匹配到的值
         while (matcher.find()) {
-            List<String> keyValuePair = Arrays.asList(matcher.group().substring(2, matcher.group().length() -1).split(":"));
+            List<String> keyValuePair = Arrays.asList(matcher.group().substring(2, matcher.group().length() - 1).split(":"));
             String entityKey = keyValuePair.get(0);
             String rawValue = keyValuePair.get(1);
 
@@ -174,7 +135,6 @@ public class ArticleService {
 
         replaceEntities(submitInfo, "这是个很好的${product:电脑}。");
     }
-
 
 
 }
