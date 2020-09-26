@@ -28,10 +28,10 @@ public class HuaWeiNlpService implements InitializingBean {
 
     private DependencyParserApi dependencyParserApi;
 
-    public MainPart getMainPart() throws NlpException, ApiException {
+    public MainPart getMainPart(String keyword) throws NlpException, ApiException {
         KeywordExtractionReq keywordExtractionReq = new KeywordExtractionReq();
         keywordExtractionReq.setLang("zh");
-        keywordExtractionReq.setText("找工作难");
+        keywordExtractionReq.setText(keyword);
         ApiResponse<DependencyParserResp> respApiResponse = dependencyParserApi.getDependencyParser(keywordExtractionReq);
         MainPart mainPart = new MainPart();
         respApiResponse.getData().getWords().stream().forEach(s -> {
