@@ -11,6 +11,7 @@ import com.hackathon.autoarticle.vo.SubmitInfo;
 import com.mysql.jdbc.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,39 +61,61 @@ public class ArticleService {
         if (! StringUtils.isNullOrEmpty(submitInfo.getObject())) {
             List<Category> objectCategories = categoryService.findAllSons(4L);
             List<Corpus> candidate = corpusService.getCandidateCorpus(objectCategories, submitInfo.getObject());
-            ultimateCandidate.retainAll(candidate);
+            if (CollectionUtils.isEmpty(ultimateCandidate)) {
+                ultimateCandidate = candidate;
+            } else{
+                ultimateCandidate.retainAll(candidate);
+            }
         }
         //age
         if (! StringUtils.isNullOrEmpty(submitInfo.getAge())) {
             List<Category> ageCategories = categoryService.findAllSons(5L);
             List<Corpus> candidate = corpusService.getCandidateCorpus(ageCategories, submitInfo.getAge());
-            ultimateCandidate.retainAll(candidate);
+            if (CollectionUtils.isEmpty(ultimateCandidate)) {
+                ultimateCandidate = candidate;
+            } else{
+                ultimateCandidate.retainAll(candidate);
+            }
         }
         //profession
         if (! StringUtils.isNullOrEmpty(submitInfo.getProfession())) {
             List<Category> professionCategories = categoryService.findAllSons(6L);
             List<Corpus> candidate = corpusService.getCandidateCorpus(professionCategories, submitInfo.getProfession());
-            ultimateCandidate.retainAll(candidate);
+            if (CollectionUtils.isEmpty(ultimateCandidate)) {
+                ultimateCandidate = candidate;
+            } else{
+                ultimateCandidate.retainAll(candidate);
+            }
         }
         //subject
         if (! StringUtils.isNullOrEmpty(submitInfo.getSubject())) {
             List<Category> subjectCategories = categoryService.findAllSons(7L);
             List<Corpus> candidate = corpusService.getCandidateCorpus(subjectCategories, submitInfo.getSubject());
-            ultimateCandidate.retainAll(candidate);
+            if (CollectionUtils.isEmpty(ultimateCandidate)) {
+                ultimateCandidate = candidate;
+            } else{
+                ultimateCandidate.retainAll(candidate);
+            }
         }
 
         // 标题
         String title = matchStructure(ultimateCandidate, Structure.TITLE);
+        title = replaceEntities(submitInfo, title);
         // 热点
         String hot = matchStructure(ultimateCandidate, Structure.HOT);
+        hot = replaceEntities(submitInfo, hot);
         // 背景
         String background = matchStructure(ultimateCandidate, Structure.BACKGROUND);
+        background = replaceEntities(submitInfo, background);
         // 观点
         String view = matchStructure(ultimateCandidate, Structure.VIEW);
+        view = replaceEntities(submitInfo, view);
         // 背书
         String endorse = matchStructure(ultimateCandidate, Structure.ENDORSE);
+        endorse = replaceEntities(submitInfo, endorse);
         // 推广
         String promotion = matchStructure(ultimateCandidate, Structure.PROMOTION);
+        promotion = replaceEntities(submitInfo, promotion);
 
         ArticleVo articleVo = new ArticleVo();
         articleVo.setTitle(title);
